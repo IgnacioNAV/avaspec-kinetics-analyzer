@@ -6,7 +6,7 @@
 
 ---
 
-## 🎯 Features
+## Features
 
 - **Automated Data Import**: Read `.txt`, `.csv`, or Excel exports directly from AvaSpec (*.txt/*.csv/*.xlsx/.xls).
 - **Region Selection**: Define, highlight, and fit individual reaction phases with slope, intercept, R², RMSE, and point count.
@@ -14,7 +14,7 @@
 - **Batch Processing**: Upload multiple datasets, overlay for comparison, and generate consolidated results.
 - **Zero-Install GUI**: Streamlit interface accessible in any browser on Windows, macOS, or Linux.
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Clone the Repository
 ```bash
