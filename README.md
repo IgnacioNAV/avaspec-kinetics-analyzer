@@ -37,7 +37,7 @@ You can either install via the bundled script or manually:
   pip install -r requirements.txt
   ```
 
-> The install script installs: `streamlit`, `plotly`, `pandas`, `numpy`, `scipy`, `pint`, `openpyxl`, and `pathlib2`. fileciteturn1file0
+> The install script installs: `streamlit`, `plotly`, `pandas`, `numpy`, `scipy`, `pint`, `openpyxl`, and `pathlib2`.
 
 ### 3. Run the App
 
