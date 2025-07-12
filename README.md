@@ -62,6 +62,16 @@ This will launch the web app at `http://localhost:8501/` in your browser.
    * Scroll to **Export All Results** for a summary table.
    * Use **Unit Conversion** options and click the download link to get an Excel report.
 
+### Note for Windows Users
+
+If you're using **Windows** and have Python installed via the **Microsoft Store**, it's recommended to **uninstall that version** before proceeding, as it may cause issues with PATH configuration and package execution.
+
+#### Recommended Installation on Windows
+
+1. Download and install Python from the official website: [https://www.python.org/downloads/windows/](https://www.python.org/downloads/windows/)
+2. During installation, make sure to **check the box** that says **“Add Python to PATH”**
+
+
 ## Project Structure
 
 ```text
