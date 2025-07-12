@@ -18,7 +18,7 @@
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-org/avaspec-kinetics-analyzer.git
+git clone https://github.com/IgnacioNAV/avaspec-kinetics-analyzer.git
 cd avaspec-kinetics-analyzer
 ````
 
