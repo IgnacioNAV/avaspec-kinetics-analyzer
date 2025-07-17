@@ -106,14 +106,6 @@ If you're using **Windows** and have Python installed via the **Microsoft Store*
 1. Download and install Python from the official website: [https://www.python.org/downloads/windows/](https://www.python.org/downloads/windows/)
 2. During installation, make sure to **check the box** that says **"Add Python to PATH"**
 
-### Deactivating the Virtual Environment
-
-When you're done using the application, you can deactivate the virtual environment:
-
-```bash
-# Deactivate virtual environment
-deactivate
-```
 
 ### Troubleshooting Installation
 
