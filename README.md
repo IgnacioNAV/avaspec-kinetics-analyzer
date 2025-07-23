@@ -1,4 +1,4 @@
-# Kinetics Data Analysis from AvaSpec-NEXOS Spectrometer
+# Kinetics Data Analysis - AvaSpec-NEXOS Spectrometer
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)  [![Streamlit](https://img.shields.io/badge/streamlit-1.0%2B-orange)](https://streamlit.io/)  [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 A user-friendly web application for analyzing enzyme kinetics progress curves. It enables interactive visualization, region selection, and statistical analysis of time-course absorbance data. The tool specializes in linear regression of selected regions and supports unit conversions.
