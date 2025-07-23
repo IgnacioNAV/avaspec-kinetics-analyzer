@@ -28,14 +28,12 @@ A user-friendly web application for analyzing enzyme kinetics progress curves. I
 - **Standard Input Units**: Time in seconds, absorbance in UA (absorbance units)
 - **Smart Column Detection**: Automatic identification of time and absorbance columns
 - **Customizable Export**: Excel files with selectable columns and professional formatting
+- **AvaSpec Integration**: Direct conversion from spectrometer Excel output to analysis-ready format
 
 ## Installation
 
 ### Method 1: Using Virtual Environment (Recommended)
 
-Creating a virtual environment ensures clean dependency management and avoids conflicts with other Python projects.
-
-#### Using venv (Built-in Python)
 ```bash
 # Create a virtual environment
 python -m venv kinetics_env
@@ -46,14 +44,17 @@ kinetics_env\Scripts\activate
 # On macOS/Linux:
 source kinetics_env/bin/activate
 
-# Install dependencies
+# Install dependencies (choose one):
 pip install streamlit plotly pandas numpy scipy pint openpyxl
+# OR use requirements file:
+pip install -r requirements.txt
 
 # Run the application
 streamlit run kinetics_analyzer.py
 ```
 
-#### Using conda
+### Method 2: Using Conda
+
 ```bash
 # Create a new conda environment
 conda create -n kinetics python=3.10
@@ -61,37 +62,24 @@ conda create -n kinetics python=3.10
 # Activate the environment
 conda activate kinetics
 
-# Install dependencies
+# Install dependencies (choose one):
 pip install streamlit plotly pandas numpy scipy pint openpyxl
-
-# Run the application
-streamlit run kinetics_analyzer.py
-```
-
-### Method 2: Quick Installation (Global Environment)
-
-```bash
-# Install required dependencies
-pip install streamlit plotly pandas numpy scipy pint openpyxl
-
-# Alternative: Use the provided installation script
-python dependencies.py
-
-# Run the web application
-streamlit run kinetics_analyzer.py
-```
-
-### Method 3: Using requirements.txt
-
-```bash
-# Create virtual environment (recommended)
-python -m venv kinetics_env
-# Activate it (Windows: kinetics_env\Scripts\activate, macOS/Linux: source kinetics_env/bin/activate)
-
-# Install from requirements file
+# OR use requirements file:
 pip install -r requirements.txt
 
 # Run the application
+streamlit run kinetics_analyzer.py
+```
+
+### Method 3: Direct Installation (Global Environment)
+
+```bash
+# Install dependencies (choose one):
+pip install streamlit plotly pandas numpy scipy pint openpyxl
+# OR use requirements file:
+pip install -r requirements.txt
+
+# Run the web application
 streamlit run kinetics_analyzer.py
 ```
 
@@ -124,12 +112,34 @@ If you're using **Windows** and have Python installed via the **Microsoft Store*
 ## Usage
 
 ### 1. **Data Preparation**
+
+#### **For AvaSpec-NEXOS Spectrometer Users**
+If you have raw Excel files from the AvaSpec-NEXOS spectrometer, use the provided conversion tool first:
+
+```bash
+# Navigate to the data_processing folder
+cd data_processing
+
+# Run the conversion script
+python avaspec_excel_to_txt.py
+```
+
+The `avaspec_excel_to_txt.py` script is specifically designed for AvaSpec-NEXOS spectrometer output
+
+The script will:
+- Scan for all Excel files (.xlsx, .xls) in the folder
+- Present an menu to process all files or select specific ones
+- Convert time from milliseconds to seconds
+- Extract absorbance data with proper decimal formatting
+- Generate tab-separated text files ready for kinetics analysis
+
+#### **General Data Preparation**
 - Prepare files with time (seconds) and absorbance (UA) columns
 - Supported formats: TXT, CSV, Excel
 - Use descriptive filenames for experimental conditions
 - Data input is standardized: time in seconds, absorbance in UA
 
-### 2. **Interactive Analysis Workflow**
+### 2. **Analysis Workflow**
 1. **Upload Data**: Use sidebar file uploader for multiple datasets
 2. **Select Dataset**: Choose from dropdown (or enable overlay mode)
 3. **Interactive Selection**: 
@@ -150,9 +160,18 @@ If you're using **Windows** and have Python installed via the **Microsoft Store*
 - **Multi-dataset Comparison**: Overlay multiple experiments for comparison
 - **Plot Customization**: Adjust point size, opacity, and line thickness
 
+## Data Processing Workflow
+
+### **Complete Analysis Pipeline**
+1. **Raw Data Collection**: AvaSpec-NEXOS spectrometer generates Excel files
+2. **Data Conversion**: Use `avaspec_excel_to_txt.py` to convert to analysis format
+3. **Kinetics Analysis**: Load converted files into `kinetics_analyzer.py` web interface
+4. **Interactive Analysis**: Select regions, calculate rates, export results
+
+
 ## Example Data Format
 
-Input data format (always in seconds and UA):
+Final input data format for kinetics analysis (always in seconds and UA):
 ```
 # Time (s)    Absorbance (UA)
 0.0          0.000
@@ -173,7 +192,3 @@ Input data format (always in seconds and UA):
 ## Acknowledgments
 
 This project was supported by project FONDECYT Postdoctorado N° 3205890 awarded to Felipe González Ordenes.
-
-## License
-
-See LICENSE file for details.
