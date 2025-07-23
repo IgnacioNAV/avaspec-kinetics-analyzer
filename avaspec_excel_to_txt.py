@@ -21,7 +21,7 @@ import random
 # Configuration
 START_ROW = 4  # Row number where data begins (1-indexed)
 
-# Inspirational quotes (matching kinetics_analyzer.py style)
+# Inspirational quotes
 QUOTES = [
     "The only way to make sense out of change is to plunge into it, move with it, and join the dance - Watts",
     "What we observe is not nature itself, but nature exposed to our method of questioning - Heisenberg",
