@@ -21,7 +21,6 @@ from typing import Dict, Tuple, List, Optional, Union
 import base64
 import random
 
-# Set page configuration
 st.set_page_config(
     page_title="Kinetics Analyzer",
     page_icon="☕",
@@ -35,11 +34,9 @@ class EnzymeKineticsStreamlit:
     """
     
     def __init__(self):
-        # Initialize unit registry
         self.ureg = pint.UnitRegistry()
         self._define_custom_units()
         
-        # Initialize session state
         if 'data_sets' not in st.session_state:
             st.session_state.data_sets = {}
         if 'regions' not in st.session_state:
@@ -47,31 +44,21 @@ class EnzymeKineticsStreamlit:
         if 'region_counter' not in st.session_state:
             st.session_state.region_counter = 0
         
-        # Inspirational quotes and facts (like GROMACS)
         self.quotes = [
-            # Scientific inspiration
-            "A hombros de gigantes - Newton",
             "The only way to make sense out of change is to plunge into it, move with it, and join the dance - Watts",
-            "In science there is only physics; all the rest is stamp collecting - Rutherford",
             "What we observe is not nature itself, but nature exposed to our method of questioning - Heisenberg",
             "Science is not only compatible with spirituality; it is a profound source of spirituality - Sagan",
-            
-            # Kinetics and chemistry
             "Kinetics tells us how fast, thermodynamics tells us how far",
             "Every reaction has its optimal path - trust the data to show you",
             "R² > 0.99: Excellent fit. R² < 0.98: Time for coffee and reconsideration",
             "The enzyme knows chemistry better than the chemist",
             "Linear kinetics: when enzymes behave like good students",
-            
-            # Enzyme jokes and facts
             "Why don't enzymes ever get tired? They have infinite turnover rates in their dreams",
             "Enzymes are like good friends: they lower your activation energy for getting things done",
             "What did the substrate say to the enzyme? You complete me... by breaking me apart",
             "Allosteric enzymes: proof that proteins have mood swings",
             "Fact: Some enzymes are so efficient they approach the diffusion limit - nature's speed demons",
             "Enzymes: billions of years of R&D, no patents required",
-            
-            # DNA, RNA, and Ribozymes
             "DNA: the world's most successful backup system (with occasional corrupted files)",
             "RNA: Jack of all trades, master of everything - sorry proteins!",
             "Ribozymes proved that RNA doesn't need protein chaperones to get things done",
@@ -83,8 +70,6 @@ class EnzymeKineticsStreamlit:
             "Telomerase: the enzyme trying to make you immortal (aging has entered the chat)",
             "DNA repair mechanisms: your genome's personal IT department working 24/7",
             "Why don't DNA strands ever get lost? They always know their 5' from their 3' end",
-            
-            # Origin of life and evolution
             "LUCA (Last Universal Common Ancestor): the ultimate single parent raising 4 billion years of offspring",
             "RNA World hypothesis: back when RNA was CEO, CFO, and the entire workforce",
             "Primordial soup: Earth's first attempt at molecular cuisine (no recipe book included)",
@@ -98,22 +83,16 @@ class EnzymeKineticsStreamlit:
             "Autocatalytic networks: when molecules formed the first self-sustaining businesses",
             "Evolution: 4 billion years of A/B testing with no rollback option",
             "Endosymbiotic theory: the first successful corporate merger in cellular history",
-            
-            # Data analysis wisdom  
             "In God we trust, all others must bring data - Deming",
             "The best thing about being a statistician is that you get to play in everyone's backyard - Tukey",
             "Without data, you're just another person with an opinion - Edwards",
             "Correlation does not imply causation, but it does waggle its eyebrows suggestively",
             "A good plot is worth a thousand p-values",
-            
-            # Coffee and lab culture
             "Caffeine: the molecule that powers science",
             "Good coffee, good data, good science",
             "Lab rule #1: Never trust data collected before the first cup of coffee",
             "Science runs on coffee and curiosity",
             "The universal solvent for scientific problems: coffee",
-            
-            # More fun facts
             "Fact: Viridis colormap was designed to be beautiful, colorblind-friendly, and scientifically accurate",
             "Fact: The Michaelis-Menten equation was derived in 1913 - still going strong!",
             "Fact: Your morning coffee contains over 1000 different chemical compounds",
@@ -484,7 +463,6 @@ class EnzymeKineticsStreamlit:
                                             legendgroup=ds_name  # Group with dataset
                                         ))
         
-        # Configure layout
         layout_config = dict(
             xaxis=dict(
                 title="Time (s)",
@@ -494,8 +472,8 @@ class EnzymeKineticsStreamlit:
                 linewidth=1,
                 ticks='outside',
                 tickcolor=line_color,
-                tickfont=dict(size=11, color=text_color),
-                title_font=dict(size=12, color=text_color)
+                tickfont=dict(size=14, color=text_color),
+                title_font=dict(size=16, color=text_color)
             ),
             yaxis=dict(
                 title="Absorbance (UA)",
@@ -505,8 +483,8 @@ class EnzymeKineticsStreamlit:
                 linewidth=1,
                 ticks='outside',
                 tickcolor=line_color,
-                tickfont=dict(size=11, color=text_color),
-                title_font=dict(size=12, color=text_color)
+                tickfont=dict(size=14, color=text_color),
+                title_font=dict(size=16, color=text_color)
             ),
             plot_bgcolor=plot_bg,
             paper_bgcolor=paper_bg,
