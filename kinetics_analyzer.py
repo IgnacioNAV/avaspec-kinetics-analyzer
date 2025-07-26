@@ -111,6 +111,20 @@ class EnzymeKineticsStreamlit:
         except Exception:
             pass
     
+    def _get_plot_width(self) -> int:
+        """Get plot width based on user selection."""
+        width_mode = st.session_state.get('plot_width_mode', 'container')
+        
+        width_mapping = {
+            'container': None,  # Use container width
+            'small': 600,
+            'medium': 800, 
+            'large': 1000,
+            'xlarge': 1200
+        }
+        
+        return width_mapping.get(width_mode, None)
+    
     def _load_data_file(self, uploaded_file) -> Optional[pd.DataFrame]:
         """Load data from uploaded file."""
         try:
@@ -206,7 +220,7 @@ class EnzymeKineticsStreamlit:
         """Create interactive Plotly figure with modern scientific styling and overlay support."""
         fig = go.Figure()
         
-        # Full viridis color palette for dynamic selection
+        # Define color palettes for dynamic selection
         full_viridis_colors = [
             '#440154', '#482777', '#3f4a8a', '#31678e', '#26838f',
             '#1f9d8a', '#6cce5a', '#b6de2b', '#fee825', '#f0f921',
@@ -214,6 +228,19 @@ class EnzymeKineticsStreamlit:
             '#4c0c72', '#5a187b', '#682681', '#753581', '#824381',
             '#8e5181', '#9a5f81', '#a66c82', '#b17a83', '#bc8785'
         ]
+        
+        # Nostalgic color palette
+        full_nostalgic_colors = [
+            '#000000', '#FF0000', '#0000FF', '#00FF00', '#00FFFF',
+            '#FF00FF', '#FFFF00', '#FF8000', '#8000FF', '#00FF80',
+            # Extended nostalgic colors for more datasets
+            '#800000', '#000080', '#008000', '#008080', '#800080',
+            '#808000', '#804000', '#400080', '#008040', '#800040'
+        ]
+        
+        # Select current color palette based on settings
+        current_palette_type = st.session_state.get('color_palette_type', 'viridis')
+        full_colors = full_nostalgic_colors if current_palette_type == 'nostalgic' else full_viridis_colors
         
         # Theme-aware styling
         if hasattr(st.session_state, 'theme') and st.session_state.theme == 'dark':
@@ -241,39 +268,52 @@ class EnzymeKineticsStreamlit:
             # Legacy overlay mode - plot all datasets (fallback)
             datasets_to_plot = list(st.session_state.data_sets.keys())
         
-        # Dynamically select viridis colors based on number of datasets for maximum contrast
-        def select_viridis_colors(n_datasets, full_palette):
-            """Select colors from viridis palette with maximum contrast."""
-            if n_datasets <= 1:
-                return [full_palette[4]]  # Middle viridis color for single dataset
-            elif n_datasets == 2:
-                return [full_palette[1], full_palette[8]]  # Dark purple and bright green
-            elif n_datasets == 3:
-                return [full_palette[0], full_palette[5], full_palette[9]]  # Dark purple, teal, yellow
-            elif n_datasets == 4:
-                return [full_palette[0], full_palette[3], full_palette[6], full_palette[9]]
-            elif n_datasets == 5:
-                return [full_palette[0], full_palette[2], full_palette[5], full_palette[7], full_palette[9]]
+        # Dynamically select colors based on number of datasets for maximum contrast
+        def select_palette_colors(n_datasets, full_palette, palette_type='viridis'):
+            """Select colors from current palette with maximum contrast."""
+            if palette_type == 'nostalgic':
+                # For nostalgic palette, use sequential order: Black, Red, Blue, Green, Cyan, Magenta, etc.
+                if n_datasets <= 1:
+                    return [full_palette[0]]  # Black for single dataset
+                else:
+                    # Return first n colors in order
+                    return [full_palette[i % len(full_palette)] for i in range(n_datasets)]
             else:
-                # For 6+ datasets, use evenly spaced colors across the full palette
-                step = len(full_palette) / n_datasets
-                indices = [int(i * step) for i in range(n_datasets)]
-                return [full_palette[i] for i in indices]
+                # Viridis logic - always use evenly spaced colors across full spectrum for maximum contrast
+                if n_datasets <= 1:
+                    return [full_palette[len(full_palette)//2]]  # Middle viridis color for single dataset
+                else:
+                    # For all cases with 2+ datasets, use evenly spaced colors across the full spectrum
+                    if n_datasets >= len(full_palette):
+                        # If more datasets than colors, cycle through
+                        return [full_palette[i % len(full_palette)] for i in range(n_datasets)]
+                    else:
+                        # Evenly distribute across the full viridis spectrum for maximum contrast
+                        step = (len(full_palette) - 1) / (n_datasets - 1) if n_datasets > 1 else 0
+                        indices = [int(i * step) for i in range(n_datasets)]
+                        return [full_palette[i] for i in indices]
         
         # Use manual colors if enabled, otherwise use dynamic selection
         if st.session_state.get('color_mode', 'auto') == 'manual' and 'manual_colors' in st.session_state:
-            # Get manual colors for the datasets being plotted
-            viridis_palette_hex = [
-                '#440154', '#482777', '#3f4a8a', '#31678e', '#26838f',
-                '#1f9d8a', '#6cce5a', '#b6de2b', '#fee825', '#f0f921'
-            ]
+            # Get manual colors for the datasets being plotted from current palette
+            if current_palette_type == 'nostalgic':
+                palette_hex = [
+                    '#000000', '#FF0000', '#0000FF', '#00FF00', '#00FFFF',
+                    '#FF00FF', '#FFFF00', '#FF8000', '#8000FF', '#00FF80'
+                ]
+            else:
+                palette_hex = [
+                    '#440154', '#482777', '#3f4a8a', '#31678e', '#26838f',
+                    '#1f9d8a', '#6cce5a', '#b6de2b', '#fee825', '#f0f921'
+                ]
+            
             colors = []
             for ds_name in datasets_to_plot:
                 color_idx = st.session_state.manual_colors.get(ds_name, 0)
-                colors.append(viridis_palette_hex[color_idx])
+                colors.append(palette_hex[color_idx])
         else:
             # Use automatic dynamic color selection
-            colors = select_viridis_colors(len(datasets_to_plot), full_viridis_colors)
+            colors = select_palette_colors(len(datasets_to_plot), full_colors, current_palette_type)
         
         # Add data traces
         for i, ds_name in enumerate(datasets_to_plot):
@@ -392,15 +432,6 @@ class EnzymeKineticsStreamlit:
                                         hoverinfo='skip',
                                         showlegend=False
                                     ))
-                                    # Add gray outline
-                                    fig.add_trace(go.Scatter(
-                                        x=region_subset['time'],
-                                        y=fitted_y,
-                                        mode='lines',
-                                        line=dict(width=st.session_state.get('plot_line_width', 5)*1.4, color='#666666'),  # Subtle gray outline
-                                        hoverinfo='skip',
-                                        showlegend=False
-                                    ))
                                     # Add main line
                                     fig.add_trace(go.Scatter(
                                         x=region_subset['time'],
@@ -438,15 +469,6 @@ class EnzymeKineticsStreamlit:
                                             y=fitted_y,
                                             mode='lines',
                                             line=dict(width=st.session_state.get('plot_line_width', 5)*2, color=f'rgba({int(dataset_color[1:3], 16)}, {int(dataset_color[3:5], 16)}, {int(dataset_color[5:7], 16)}, 0.2)'),
-                                            hoverinfo='skip',
-                                            showlegend=False
-                                        ))
-                                        # Add gray outline
-                                        fig.add_trace(go.Scatter(
-                                            x=region_subset['time'],
-                                            y=fitted_y,
-                                            mode='lines',
-                                            line=dict(width=st.session_state.get('plot_line_width', 5)*1.4, color='#666666'),  # Subtle gray outline
                                             hoverinfo='skip',
                                             showlegend=False
                                         ))
@@ -496,7 +518,8 @@ class EnzymeKineticsStreamlit:
                 borderwidth=1,
                 font=dict(size=10, color=text_color)
             ),
-            height=500,
+            height=st.session_state.get('plot_height', 500),
+            width=self._get_plot_width(),
             margin=dict(l=60, r=100, t=40, b=60),
             font=dict(family="Arial", color=text_color),
             hovermode='closest'
@@ -849,7 +872,18 @@ class EnzymeKineticsStreamlit:
             # Color palette selection
             st.subheader("Color Settings")
             
-            # Full viridis palette with descriptive names
+            # Color palette mode selection
+            color_palette_type = st.radio(
+                "Color Palette",
+                ["Viridis", "Nostalgic"],
+                index=0 if st.session_state.get('color_palette_type', 'viridis') == 'viridis' else 1,
+                help="Choose color palette style"
+            )
+            
+            # Store palette type
+            st.session_state.color_palette_type = 'viridis' if color_palette_type == "Viridis" else 'nostalgic'
+            
+            # Define color palettes
             viridis_palette = [
                 ('#440154', 'Dark Purple'),
                 ('#482777', 'Deep Violet'), 
@@ -863,7 +897,24 @@ class EnzymeKineticsStreamlit:
                 ('#f0f921', 'Bright Yellow')
             ]
             
-            # Color palette mode selection
+            # Nostalgic color palette
+            nostalgic_palette = [
+                ('#000000', 'Black'),
+                ('#FF0000', 'Red'),
+                ('#0000FF', 'Blue'),
+                ('#00FF00', 'Green'),
+                ('#00FFFF', 'Cyan'),
+                ('#FF00FF', 'Magenta'),
+                ('#FFFF00', 'Yellow'),
+                ('#FF8000', 'Orange'),
+                ('#8000FF', 'Purple'),
+                ('#00FF80', 'Spring Green')
+            ]
+            
+            # Select current palette
+            current_palette = nostalgic_palette if st.session_state.color_palette_type == 'nostalgic' else viridis_palette
+            
+            # Color selection mode
             color_mode = st.radio(
                 "Color Selection Mode",
                 ["Automatic (Dynamic)", "Manual Selection"],
@@ -871,11 +922,14 @@ class EnzymeKineticsStreamlit:
                 help="Choose automatic color selection or manually pick colors"
             )
             
-            # Store color mode
-            if color_mode == "Automatic (Dynamic)":
-                st.session_state.color_mode = 'auto'
-            else:
-                st.session_state.color_mode = 'manual'
+            # Store color mode and track changes
+            new_color_mode = 'auto' if color_mode == "Automatic (Dynamic)" else 'manual'
+            
+            # Track mode changes for color preservation
+            if 'color_mode' in st.session_state and st.session_state.color_mode != new_color_mode:
+                st.session_state.color_mode_previous = st.session_state.color_mode
+            
+            st.session_state.color_mode = new_color_mode
             
             # Manual color selection
             if st.session_state.color_mode == 'manual' and st.session_state.data_sets:
@@ -885,24 +939,24 @@ class EnzymeKineticsStreamlit:
                 if 'manual_colors' not in st.session_state:
                     st.session_state.manual_colors = {}
                 
-                # Color selector for each dataset
+                # Simple color selector for each dataset
                 for i, dataset_name in enumerate(st.session_state.data_sets.keys()):
-                    # Create color picker with viridis colors
+                    # Create color picker with current palette colors
                     col1, col2 = st.columns([3, 1])
                     with col1:
-                        # Display viridis color options with descriptive names
+                        # Display color options with descriptive names from current palette
                         selected_color_idx = st.selectbox(
                             f"{dataset_name}:",
-                            range(len(viridis_palette)),
-                            index=st.session_state.manual_colors.get(dataset_name, i % len(viridis_palette)),
-                            format_func=lambda x: viridis_palette[x][1],  # Use descriptive name
-                            key=f"color_select_{dataset_name}"
+                            range(len(current_palette)),
+                            index=st.session_state.manual_colors.get(dataset_name, i % len(current_palette)),
+                            format_func=lambda x: current_palette[x][1],  # Use descriptive name
+                            key=f"color_select_{dataset_name}_{st.session_state.color_palette_type}"
                         )
                         st.session_state.manual_colors[dataset_name] = selected_color_idx
                     
                     with col2:
                         # Show color preview
-                        color_hex = viridis_palette[selected_color_idx][0]  # Get hex color
+                        color_hex = current_palette[selected_color_idx][0]  # Get hex color
                         st.markdown(f"""
                         <div style="
                             width: 30px; 
@@ -926,8 +980,20 @@ class EnzymeKineticsStreamlit:
                 help="Data must contain time (seconds) and absorbance (UA) columns. Supported formats: TXT, CSV, Excel (.xlsx, .xls)"
             )
             
-            # Process uploaded files
+            # Clean up datasets that are no longer uploaded
             if uploaded_files:
+                uploaded_filenames = {uploaded_file.name for uploaded_file in uploaded_files}
+                # Remove datasets that are no longer in the uploaded files
+                datasets_to_remove = [name for name in st.session_state.data_sets.keys() if name not in uploaded_filenames]
+                for dataset_name in datasets_to_remove:
+                    del st.session_state.data_sets[dataset_name]
+                    # Also remove associated regions and manual colors
+                    if dataset_name in st.session_state.regions:
+                        del st.session_state.regions[dataset_name]
+                    if 'manual_colors' in st.session_state and dataset_name in st.session_state.manual_colors:
+                        del st.session_state.manual_colors[dataset_name]
+                
+                # Process uploaded files
                 st.subheader("Loaded Files")
                 for uploaded_file in uploaded_files:
                     if uploaded_file.name not in st.session_state.data_sets:
@@ -940,6 +1006,13 @@ class EnzymeKineticsStreamlit:
                                 st.error(f"Failed to load: {uploaded_file.name}")
                     else:
                         st.info(f"Already loaded: {uploaded_file.name}")
+            else:
+                # If no files are uploaded, clear all data
+                if st.session_state.data_sets:
+                    st.session_state.data_sets = {}
+                    st.session_state.regions = {}
+                    if 'manual_colors' in st.session_state:
+                        st.session_state.manual_colors = {}
             
             st.divider()
             
@@ -950,11 +1023,15 @@ class EnzymeKineticsStreamlit:
             if 'plot_marker_size' not in st.session_state:
                 st.session_state.plot_marker_size = 3
             if 'plot_marker_opacity' not in st.session_state:
-                st.session_state.plot_marker_opacity = 0.5
+                st.session_state.plot_marker_opacity = 1.0
             if 'plot_line_width' not in st.session_state:
                 st.session_state.plot_line_width = 5
             if 'plot_line_opacity' not in st.session_state:
-                st.session_state.plot_line_opacity = 1.0
+                st.session_state.plot_line_opacity = 0.7
+            if 'plot_height' not in st.session_state:
+                st.session_state.plot_height = 500
+            if 'plot_width_mode' not in st.session_state:
+                st.session_state.plot_width_mode = 'container'
             
             # Data points customization
             st.write("**Data Points:**")
@@ -1004,12 +1081,49 @@ class EnzymeKineticsStreamlit:
                     help="Opacity of fitted lines (1.0 = opaque, 0.1 = very transparent)"
                 )
             
+            # Plot size customization
+            st.write("**Plot Size:**")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.session_state.plot_height = st.slider(
+                    "Height (px)",
+                    min_value=300,
+                    max_value=1000,
+                    value=st.session_state.plot_height,
+                    step=50,
+                    key="plot_height_slider",
+                    help="Height of the plot in pixels"
+                )
+            with col2:
+                plot_width_options = ["Container Width", "Small (600px)", "Medium (800px)", "Large (1000px)", "Extra Large (1200px)"]
+                width_mode_index = ["container", "small", "medium", "large", "xlarge"].index(st.session_state.plot_width_mode)
+                
+                selected_width = st.selectbox(
+                    "Width",
+                    plot_width_options,
+                    index=width_mode_index,
+                    key="plot_width_selector",
+                    help="Width of the plot"
+                )
+                
+                # Update session state based on selection
+                width_mapping = {
+                    "Container Width": "container",
+                    "Small (600px)": "small", 
+                    "Medium (800px)": "medium",
+                    "Large (1000px)": "large",
+                    "Extra Large (1200px)": "xlarge"
+                }
+                st.session_state.plot_width_mode = width_mapping[selected_width]
+            
             # Reset to defaults button
             if st.button("Reset to Defaults", type="secondary", use_container_width=True):
                 st.session_state.plot_marker_size = 3
-                st.session_state.plot_marker_opacity = 0.5
+                st.session_state.plot_marker_opacity = 1.0
                 st.session_state.plot_line_width = 5
-                st.session_state.plot_line_opacity = 1.0
+                st.session_state.plot_line_opacity = 0.7
+                st.session_state.plot_height = 500
+                st.session_state.plot_width_mode = 'container'
                 st.rerun()
             
             st.divider()
@@ -1022,12 +1136,6 @@ class EnzymeKineticsStreamlit:
                 if total_regions > 0:
                     st.metric("Regions analyzed", total_regions)
             
-            # Clear data button
-            if st.button("Clear All Data", type="secondary", use_container_width=True):
-                st.session_state.data_sets = {}
-                st.session_state.regions = {}
-                st.session_state.region_counter = 0
-                st.rerun()
         
         # Main content area
         if not st.session_state.data_sets:
@@ -1108,7 +1216,10 @@ class EnzymeKineticsStreamlit:
             else:
                 unique_plot_key = f"{plot_key}_{selected_dataset}"
             
-            plot_selection = st.plotly_chart(fig, use_container_width=True, key=unique_plot_key, on_select="rerun", config=config)
+            # Determine if we should use container width or fixed width
+            use_container_width = st.session_state.get('plot_width_mode', 'container') == 'container'
+            
+            plot_selection = st.plotly_chart(fig, use_container_width=use_container_width, key=unique_plot_key, on_select="rerun", config=config)
             
             
             # Handle plot selection events (simplified approach)
@@ -1201,22 +1312,9 @@ class EnzymeKineticsStreamlit:
                         key="new_region_name"
                     )
                 
-                # Apply selection button if there's a current selection for this dataset
-                if ('selected_start' in st.session_state and 'selected_end' in st.session_state and
-                    st.session_state.get('selected_for_dataset') == selected_dataset):
-                    col_sel1, col_sel2, col_sel3 = st.columns([2, 2, 2])
-                    with col_sel1:
-                        st.write(f"**Available:** {st.session_state.selected_start:.2f}s")
-                    with col_sel2:
-                        st.write(f"**to** {st.session_state.selected_end:.2f}s")
-                    with col_sel3:
-                        if st.button("Apply to Form", type="secondary"):
-                            # Force increment counter to refresh widgets
-                            st.session_state.selection_counter = st.session_state.get('selection_counter', 0) + 1
-                            st.rerun()
                 
                 # Extinction coefficient and units
-                st.subheader("Slope Calculation Options")
+                st.subheader("Unit Conversions (Optional)")
                 col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
                 
                 with col1:
@@ -1250,12 +1348,12 @@ class EnzymeKineticsStreamlit:
                     target_time_unit = st.selectbox(
                         "Time Unit",
                         ["s", "min"],
-                        index=1,
+                        index=0,
                         help="Time unit for slope calculation"
                     )
                 
                 # Enzyme units transformation section
-                st.subheader("Enzyme Units Conversion (Optional)")
+                st.subheader("Enzyme Unit Conversion")
                 col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
                 
                 with col1:
@@ -1350,16 +1448,19 @@ class EnzymeKineticsStreamlit:
             
             # Show existing regions
             if st.session_state.regions[selected_dataset]:
-                st.subheader("Analysis Results")
+                st.subheader("📊 Analysis Results")
                 
                 # Create editable table for regions
                 regions_data = []
                 for region_name, region_data in st.session_state.regions[selected_dataset].items():
                     # Determine which slope to display
                     if 'converted_slope' in region_data and 'slope_units' in region_data:
-                        slope_display = f"{region_data['converted_slope']:.6f} {region_data['slope_units']}"
+                        if region_data['slope_units'] in ['UA/s', 'UA/min']:
+                            slope_display = f"{region_data['converted_slope']:.3e} {region_data['slope_units']}"
+                        else:
+                            slope_display = f"{region_data['converted_slope']:.6f} {region_data['slope_units']}"
                     else:
-                        slope_display = f"{region_data['slope']:.6f} UA/s"
+                        slope_display = f"{region_data['slope']:.3e} UA/s"
                     
                     # Get standard error to display
                     if 'converted_std_error' in region_data and 'slope_units' in region_data:
@@ -1440,10 +1541,13 @@ class EnzymeKineticsStreamlit:
             for region in all_regions:
                 # Determine slope display
                 if 'converted_slope' in region and 'slope_units' in region:
-                    slope_display = f"{region['converted_slope']:.6f}"
+                    if region['slope_units'] in ['UA/s', 'UA/min']:
+                        slope_display = f"{region['converted_slope']:.3e}"
+                    else:
+                        slope_display = f"{region['converted_slope']:.6f}"
                     slope_units = region['slope_units']
                 else:
-                    slope_display = f"{region['slope']:.6f}"
+                    slope_display = f"{region['slope']:.3e}"
                     slope_units = 'UA/s'
                 
                 # Get standard errors
@@ -1458,7 +1562,7 @@ class EnzymeKineticsStreamlit:
                     'Slope': slope_display,
                     'Slope_Units': slope_units,
                     'Std_Error_Converted': f"{converted_std_err:.6f}",
-                    'Original_Slope_UA_s': f"{region['slope']:.6f}",
+                    'Original_Slope_UA_s': f"{region['slope']:.3e}",
                     'Original_Std_Error': f"{region['std_error']:.6f}",
                     'Extinction_Coeff': region.get('extinction_coeff', 'N/A'),
                     'R_Squared': f"{region['r_squared']:.4f}",
@@ -1626,23 +1730,6 @@ class EnzymeKineticsStreamlit:
                 else:
                     st.warning("Please select at least one optional column to export")
                 
-                # Export information
-                with st.expander("Export Information", expanded=False):
-                    st.info("Results table includes both original slopes (UA/s) and converted slopes with their respective units.")
-                    st.markdown("""
-                    **Column Descriptions:**
-                    - **Slope**: Converted slope with units (if extinction coefficient was used)
-                    - **Slope_Units**: Units of the converted slope  
-                    - **Std_Error_Converted**: Standard error in converted units
-                    - **Original_Slope_UA_s**: Original slope in absorbance units per second
-                    - **Original_Std_Error**: Original standard error in UA/s
-                    - **Extinction_Coeff**: Extinction coefficient used (if any)
-                    - **Enzyme_Activity**: Enzyme activity (if calculated)
-                    - **Enzyme_Activity_Units**: Units for enzyme activity (U/mL or U/mg)
-                    - **R_Squared**: Coefficient of determination (goodness of fit)
-                    - **Number_of_Points**: Number of data points in the region
-                    - **RMSE**: Root mean square error of the fit
-                    """)
 
 # Run the application
 if __name__ == "__main__":
