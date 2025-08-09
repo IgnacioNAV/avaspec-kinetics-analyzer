@@ -567,6 +567,10 @@ class EnzymeKineticsStreamlit:
         residuals = region_data['product'] - fitted_values
         rmse = np.sqrt(np.mean(residuals**2))
         
+        # Calculate mean absorbance and standard deviation for the region
+        mean_absorbance = np.mean(region_data['product'])
+        absorbance_std_dev = np.std(region_data['product'], ddof=1)  # Sample standard deviation
+        
         
         # Convert slope using extinction coefficient if provided
         converted_slope = slope
@@ -629,7 +633,9 @@ class EnzymeKineticsStreamlit:
             'enzyme_activity': enzyme_activity,  # Enzyme activity if calculated
             'enzyme_activity_units': enzyme_activity_units,  # Enzyme activity units
             'n_points': n,
-            'rmse': rmse
+            'rmse': rmse,
+            'mean_absorbance': mean_absorbance,  # Mean absorbance in the region
+            'absorbance_std_dev': absorbance_std_dev  # Standard deviation of absorbance
         }
     
     def _suggest_regions(self, dataset_name: str) -> Dict[str, Tuple[float, float]]:
@@ -1511,12 +1517,17 @@ class EnzymeKineticsStreamlit:
                                 if 'Enzyme Activity' in regions_data[i]:
                                     enzyme_display = f" | Enzyme Activity: {regions_data[i]['Enzyme Activity']}"
                                 
+                                # Add mean absorbance display
+                                mean_abs_display = ""
+                                if 'mean_absorbance' in region_data and 'absorbance_std_dev' in region_data:
+                                    mean_abs_display = f" | Mean Abs: {region_data['mean_absorbance']:.4f} ± {region_data['absorbance_std_dev']:.4f} UA"
+                                
                                 r_squared_val = region_data['r_squared']
                                 
                                 # Simple display - R² icons provide the visual feedback
                                 st.info(f"**{region_name}** | {regions_data[i]['Start']} - {regions_data[i]['End']} | "
                                        f"Slope: {slope_display} | R²: {regions_data[i]['R²']} | "
-                                       f"Points: {regions_data[i]['Number of Points']}{enzyme_display}")
+                                       f"Points: {regions_data[i]['Number of Points']}{mean_abs_display}{enzyme_display}")
                             
                             with col2:
                                 # Individual delete button for each region
@@ -1567,7 +1578,9 @@ class EnzymeKineticsStreamlit:
                     'Extinction_Coeff': region.get('extinction_coeff', 'N/A'),
                     'R_Squared': f"{region['r_squared']:.4f}",
                     'Number_of_Points': region['n_points'],
-                    'RMSE': f"{region['rmse']:.4f}"
+                    'RMSE': f"{region['rmse']:.4f}",
+                    'Mean_Absorbance': f"{region.get('mean_absorbance', 0):.4f}",
+                    'Absorbance_Std_Dev': f"{region.get('absorbance_std_dev', 0):.4f}"
                 }
                 
                 # Add enzyme activity if available
@@ -1622,10 +1635,18 @@ class EnzymeKineticsStreamlit:
                         )
                     
                     with col_b:
+                        # Mean absorbance data
+                        export_cols['Mean_Absorbance'] = st.checkbox(
+                            "Mean Absorbance",
+                            value=True,
+                            key="export_mean_absorbance",
+                            help="Mean absorbance value and standard deviation for each region"
+                        )
+                        
                         # Extinction coefficient
                         export_cols['Extinction_Coeff'] = st.checkbox(
                             "Extinction Coefficient",
-                            value=True,
+                            value=False,
                             key="export_extinction_coeff",
                             help="Extinction coefficient used in calculations"
                         )
@@ -1679,6 +1700,11 @@ class EnzymeKineticsStreamlit:
                         # Include original standard error
                         if 'Original_Std_Error' in available_columns:
                             final_columns.add('Original_Std_Error')
+                    
+                    elif col == 'Mean_Absorbance':
+                        # Include absorbance standard deviation
+                        if 'Absorbance_Std_Dev' in available_columns:
+                            final_columns.add('Absorbance_Std_Dev')
                     
                     elif col == 'Enzyme_Activity':
                         # Include enzyme activity units
