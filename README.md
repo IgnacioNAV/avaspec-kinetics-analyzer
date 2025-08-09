@@ -32,28 +32,7 @@ A user-friendly web application for analyzing enzyme kinetics progress curves. I
 
 ## Installation
 
-### Method 1: Using Virtual Environment (Recommended)
-
-```bash
-# Create a virtual environment
-python -m venv kinetics_env
-
-# Activate the virtual environment
-# On Windows:
-kinetics_env\Scripts\activate
-# On macOS/Linux:
-source kinetics_env/bin/activate
-
-# Install dependencies (choose one):
-pip install streamlit plotly pandas numpy scipy pint openpyxl
-# OR use requirements file:
-pip install -r requirements.txt
-
-# Run the application
-streamlit run kinetics_analyzer.py
-```
-
-### Method 2: Using Conda
+### Method 1: Using Conda (Recommended)
 
 ```bash
 # Create a new conda environment
