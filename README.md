@@ -1,7 +1,13 @@
-# Kinetics Data Analysis - Progress curves analysis and tools for AvaSpec-NEXOS Spectrometer
-[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)  [![Streamlit](https://img.shields.io/badge/streamlit-1.0%2B-orange)](https://streamlit.io/)  [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+# Kinetics Data Analysis v1.0 - Progress curves analysis with AvaSpec-NEXOS integration
+[![Version](https://img.shields.io/badge/version-v1.0-brightgreen)](https://github.com/username/kinetics-analyzer/releases)  [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)  [![Streamlit](https://img.shields.io/badge/streamlit-1.0%2B-orange)](https://streamlit.io/)  [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 A user-friendly web application for analyzing enzyme kinetics progress curves. It enables interactive visualization, region selection, and statistical analysis of time-course absorbance data. The tool specializes in linear regression of selected regions and supports unit conversions.
+
+## 🌐 Online Access
+
+**Try it now without installation**: [https://kinetics-analyzer.streamlit.app/](https://kinetics-analyzer.streamlit.app/)
+
+The web application is freely available online and provides full functionality without requiring local installation. For users who prefer local deployment or need offline access, installation instructions are provided below.
 
 ## Features
 
@@ -29,6 +35,23 @@ A user-friendly web application for analyzing enzyme kinetics progress curves. I
 - **Smart Column Detection**: Automatic identification of time and absorbance columns
 - **Customizable Export**: Excel files with selectable columns and professional formatting
 - **AvaSpec Integration**: Direct conversion from spectrometer Excel output to analysis-ready format
+
+## AvaSpec-NEXOS Integration
+
+This tool provides native support for **AvaSpec-NEXOS spectrometer** data, offering seamless integration from raw measurements to kinetics analysis.
+
+### **Two Usage Approaches**
+
+**Integrated Workflow**: Use the main web application to directly upload AvaSpec Excel files - the tool automatically detects the format and converts the data.
+
+**Standalone Script**: Use the dedicated `avaspec_excel_to_txt.py` converter for batch processing or preprocessing:
+
+```bash
+python avaspec_excel_to_txt.py
+```
+
+- **Automatically identifies AvaSpec Excel format**
+- **Handles multiple files with interactive menu selection**
 
 ## Installation
 
@@ -106,11 +129,11 @@ python avaspec_excel_to_txt.py
 The `avaspec_excel_to_txt.py` script is specifically designed for AvaSpec-NEXOS spectrometer output
 
 The script will:
-- Scan for all Excel files (.xlsx, .xls) in the folder
+- Scan for all Excel files in the folder
 - Present an menu to process all files or select specific ones
 - Convert time from milliseconds to seconds
 - Extract absorbance data with proper decimal formatting
-- Generate tab-separated text files ready for kinetics analysis
+- Generate tab-separated text files
 
 #### **General Data Preparation**
 - Prepare files with time (seconds) and absorbance (UA) columns
@@ -129,7 +152,7 @@ The script will:
    - Set extinction coefficient for concentration conversions
    - Choose target units (mM, μM, per second/minute)
 5. **Add Region**: Click "Add Region" to perform analysis
-6. **Export Results**: Download comprehensive Excel reports
+6. **Export Results**: Download Excel reports
 
 ### 3. **Features**
 - **Multiple Regions**: Analyze different phases of the same experiment
@@ -138,14 +161,6 @@ The script will:
 - **Statistical Validation**: View R², RMSE, and standard errors
 - **Multi-dataset Comparison**: Overlay multiple experiments for comparison
 - **Plot Customization**: Adjust point size, opacity, and line thickness
-
-## Data Processing Workflow
-
-### **Complete Analysis Pipeline**
-1. **Raw Data Collection**: AvaSpec-NEXOS spectrometer generates Excel files
-2. **Data Conversion**: Use `avaspec_excel_to_txt.py` to convert to analysis format
-3. **Kinetics Analysis**: Load converted files into `kinetics_analyzer.py` web interface
-4. **Interactive Analysis**: Select regions, calculate rates, export results
 
 
 ## Example Data Format
@@ -159,6 +174,14 @@ Final input data format for kinetics analysis (always in seconds and UA):
 3.0          0.048
 ...
 ```
+
+## Example Files
+
+The repository includes example datasets for testing and demonstration:
+
+**AvaSpec Sample Data**: [`original_data/`](original_data/) contains 11 example Excel files (1.xlsx - 11.xlsx) from AvaSpec-NEXOS spectrometer in the standard format.
+
+**Processed Examples**: [`processed_data/`](processed_data/) contains the corresponding converted text files (1.txt - 11.txt) showing the expected output format after conversion.
 
 
 ## Authors
