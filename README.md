@@ -73,7 +73,7 @@ pip install -r requirements.txt
 streamlit run kinetics_analyzer.py
 ```
 
-### Method 3: Direct Installation (Global Environment)
+### Method 2: Direct Installation (Global Environment)
 
 ```bash
 # Install dependencies (choose one):
